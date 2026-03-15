@@ -357,6 +357,12 @@
         .boq-table tr:last-child td {
             border-bottom: none;
         }
+        .formula-note {
+            font-size: 0.85em;
+            color: #1b5e20;
+            margin-top: 5px;
+            font-style: italic;
+        }
 
         @media print {
             body {
@@ -495,7 +501,7 @@
                         </select>
                     </div>
                     
-                    <h4>X - Direction (Short Span / Main Reinforcement)</h4>
+                    <h4>X - Direction (Short Span / Main Reinforcement - Bent-up Bars)</h4>
                     <div class="input-group">
                         <label for="barDiameterX">Bar Diameter (mm) - X Direction</label>
                         <select id="barDiameterX">
@@ -511,7 +517,7 @@
                         <input type="number" id="barSpacingX" value="150" step="10" min="50" max="300">
                     </div>
 
-                    <h4>Y - Direction (Long Span / Distribution Reinforcement)</h4>
+                    <h4>Y - Direction (Long Span / Distribution Reinforcement - Straight Bars)</h4>
                     <div class="input-group">
                         <label for="barDiameterY">Bar Diameter (mm) - Y Direction</label>
                         <select id="barDiameterY">
@@ -1160,7 +1166,7 @@
                     <div class="design-step">
                         <h3>4. REINFORCEMENT DESIGN (One-Way Slab)</h3>
                         <div class="step-content">
-                            <h4>X - Direction (Main Reinforcement along short span):</h4>
+                            <h4>X - Direction (Main Reinforcement along short span - Bent-up Bars):</h4>
                             <p><strong>Required A<sub>st</sub> =</strong> ${result.reinforcement.AstReqX.toFixed(0)} mm²/m</p>
                             <p><strong>Minimum A<sub>st</sub> (0.12%) =</strong> ${result.reinforcement.minAst.toFixed(0)} mm²/m</p>
                             <p><strong>Design A<sub>st</sub> required =</strong> ${result.reinforcement.requiredAstX.toFixed(0)} mm²/m</p>
@@ -1169,7 +1175,7 @@
                                 ${result.reinforcement.statusX === 'safe' ? '✓ MAIN REINFORCEMENT ADEQUATE' : '✗ INADEQUATE - Increase bar diameter or reduce spacing'}
                             </div>
                             
-                            <h4 style="margin-top:15px;">Y - Direction (Distribution Reinforcement along long span):</h4>
+                            <h4 style="margin-top:15px;">Y - Direction (Distribution Reinforcement along long span - Straight Bars):</h4>
                             <p><strong>Minimum distribution steel (0.12% of gross area) =</strong> ${result.reinforcement.minAst.toFixed(0)} mm²/m</p>
                             <p><strong>Provided:</strong> ${designData.barDiaY} mm Ø @ ${designData.spacingY} mm c/c = ${providedAstY.toFixed(0)} mm²/m</p>
                             <div class="safety-badge ${result.reinforcement.statusY === 'safe' ? 'safe' : 'unsafe'}">
@@ -1181,7 +1187,7 @@
             } else {
                 resultsHTML += `
                     <div class="design-step">
-                        <h3>4. REINFORCEMENT DESIGN (Two-Way Slab)</h3>
+                        <h3>4. REINFORCEMENT DESIGN (Two-Way Slab - Both Directions Bent-up)</h3>
                         <div class="step-content">
                             <h4>X - Direction (Short Span - l<sub>x</sub> = ${Lx} m):</h4>
                             <p><strong>Positive moment steel required:</strong> ${result.reinforcement.AstXpos.toFixed(0)} mm²/m</p>
@@ -1283,7 +1289,7 @@
                         <p><strong>Design Type:</strong> ${designType === 'oneway' ? 'One-Way Slab' : 'Two-Way Restrained Slab'}</p>
                         <p><strong>Overall Depth (D):</strong> ${overallDepth.toFixed(0)} mm</p>
                         <p><strong>Effective Depth (d):</strong> ${effectiveDepth.toFixed(0)} mm</p>
-                        <p><strong>X-Direction Reinforcement:</strong> ${designData.barDiaX} mm Ø @ ${designData.spacingX} mm c/c (${providedAstX.toFixed(0)} mm²/m)</p>
+                        <p><strong>X-Direction Reinforcement (Bent-up):</strong> ${designData.barDiaX} mm Ø @ ${designData.spacingX} mm c/c (${providedAstX.toFixed(0)} mm²/m)</p>
                         <p><strong>Y-Direction Reinforcement:</strong> ${designData.barDiaY} mm Ø @ ${designData.spacingY} mm c/c (${providedAstY.toFixed(0)} mm²/m)</p>
                         <p><strong>Service Stress f<sub>s</sub>:</strong> ${fs.toFixed(2)} N/mm²</p>
                         <p><strong>Crack Width:</strong> ${crackWidth.toFixed(3)} mm</p>
@@ -1297,7 +1303,7 @@
             document.getElementById('designSteps').innerHTML = resultsHTML;
         }
 
-        // ---------- Detailed Bill of Quantities (using BBS data from PDF) ----------
+        // ---------- Detailed Bill of Quantities with BENT-UP BAR CALCULATION ----------
         function renderBOQ() {
             const boqDiv = document.getElementById('boqContainer');
             if (!designData.reinforcement) {
@@ -1328,67 +1334,93 @@
             // Concrete volume
             const concreteVolume = area * (overallDepth / 1000); // m³
 
-            // ---- Reinforcement calculation using BBS data from PDF ----
+            // ---- Reinforcement calculation with BENT-UP BARS ----
             // Unit weight formula from PDF: D²/162 (kg/m)
             const unitWeightX = (barDiaX * barDiaX) / 162; // kg/m
             const unitWeightY = (barDiaY * barDiaY) / 162; // kg/m
+
+            // Development length (Ld) as per IS code - typically 40d to 50d
+            // Using 40d for simplicity
+            const LdX = 40 * barDiaX / 1000; // in meters
+            const LdY = 40 * barDiaY / 1000; // in meters
+
+            // Crank length (0.42D) for bent-up bars
+            // D is the overall depth minus cover (effective depth for crank)
+            const crankD = overallDepth - cover; // mm
+            const crankExtra = 0.42 * crankD / 1000; // in meters
+
+            // Bend deduction for 45° bends (2 bends for cranked bar)
+            // Typically 1d per bend for 45° (as per IS code)
+            const bendDeduction45 = 1 * barDiaX / 1000; // in meters per bend
+            const totalBendDeduction = 2 * bendDeduction45; // for two 45° bends
 
             let reinforcementItems = [];
             let totalSteelWeight = 0;
 
             if (slabType === 'oneway') {
-                // Main bars (along short span - X direction)
-                const numMain = Math.ceil((Ly * 1000) / spacingX); // along width (Ly)
-                const mainLength = Lx + 0.2; // adding 0.2m for hooks/anchorage
-                const mainWeight = numMain * mainLength * unitWeightX;
+                // MAIN BARS (X-Direction) - Bent-up bars
+                // Cutting Length formula for bent-up bar: = Lx + 2*Ld + 0.42D - 2*(1d) for 45° bends
+                const cuttingLengthX = Lx + (2 * LdX) + crankExtra - totalBendDeduction;
+                const numBarsX = Math.ceil((Ly * 1000) / spacingX); // along width (Ly)
+                const weightX = numBarsX * cuttingLengthX * unitWeightX;
 
                 reinforcementItems.push({
-                    description: `Main reinforcement (X-Dir) ${barDiaX} mm Ø @ ${spacingX} mm c/c`,
-                    numBars: numMain,
-                    barLength: mainLength.toFixed(2),
-                    unitWeight: unitWeightX.toFixed(3),
-                    weight: mainWeight
-                });
-                totalSteelWeight += mainWeight;
-
-                // Distribution bars (Y direction)
-                const numDist = Math.ceil((Lx * 1000) / spacingY); // along Lx
-                const distLength = Ly + 0.2;
-                const distWeight = numDist * distLength * unitWeightY;
-
-                reinforcementItems.push({
-                    description: `Distribution steel (Y-Dir) ${barDiaY} mm Ø @ ${spacingY} mm c/c`,
-                    numBars: numDist,
-                    barLength: distLength.toFixed(2),
-                    unitWeight: unitWeightY.toFixed(3),
-                    weight: distWeight
-                });
-                totalSteelWeight += distWeight;
-            } else {
-                // Two-way slab: main bars in both directions
-                // X-direction (short span)
-                const numX = Math.ceil((Ly * 1000) / spacingX); // along width (Ly)
-                const lengthX = Lx + 0.2;
-                const weightX = numX * lengthX * unitWeightX;
-
-                reinforcementItems.push({
-                    description: `Main reinforcement (X-Dir - short span) ${barDiaX} mm Ø @ ${spacingX} mm c/c`,
-                    numBars: numX,
-                    barLength: lengthX.toFixed(2),
+                    description: `Main reinforcement (X-Dir) - BENT-UP BARS`,
+                    details: `${barDiaX} mm Ø @ ${spacingX} mm c/c`,
+                    numBars: numBarsX,
+                    cuttingLength: cuttingLengthX.toFixed(2),
+                    formula: `Lx + 2×Ld + 0.42D - 2×(1d) = ${Lx.toFixed(2)} + ${(2*LdX).toFixed(2)} + ${crankExtra.toFixed(2)} - ${totalBendDeduction.toFixed(2)}`,
                     unitWeight: unitWeightX.toFixed(3),
                     weight: weightX
                 });
                 totalSteelWeight += weightX;
 
-                // Y-direction (long span)
-                const numY = Math.ceil((Lx * 1000) / spacingY); // along Lx
-                const lengthY = Ly + 0.2;
-                const weightY = numY * lengthY * unitWeightY;
+                // DISTRIBUTION BARS (Y-Direction) - Straight bars
+                const cuttingLengthY = Ly + 0.2; // straight bars with hooks
+                const numBarsY = Math.ceil((Lx * 1000) / spacingY); // along Lx
+                const weightY = numBarsY * cuttingLengthY * unitWeightY;
 
                 reinforcementItems.push({
-                    description: `Main reinforcement (Y-Dir - long span) ${barDiaY} mm Ø @ ${spacingY} mm c/c`,
-                    numBars: numY,
-                    barLength: lengthY.toFixed(2),
+                    description: `Distribution steel (Y-Dir) - STRAIGHT BARS`,
+                    details: `${barDiaY} mm Ø @ ${spacingY} mm c/c`,
+                    numBars: numBarsY,
+                    cuttingLength: cuttingLengthY.toFixed(2),
+                    formula: `Ly + 0.2 (for hooks)`,
+                    unitWeight: unitWeightY.toFixed(3),
+                    weight: weightY
+                });
+                totalSteelWeight += weightY;
+            } else {
+                // TWO-WAY SLAB - Both directions bent-up
+                // X-Direction (short span)
+                const cuttingLengthX = Lx + (2 * LdX) + crankExtra - totalBendDeduction;
+                const numBarsX = Math.ceil((Ly * 1000) / spacingX);
+                const weightX = numBarsX * cuttingLengthX * unitWeightX;
+
+                reinforcementItems.push({
+                    description: `Main reinforcement (X-Dir - short span) - BENT-UP`,
+                    details: `${barDiaX} mm Ø @ ${spacingX} mm c/c`,
+                    numBars: numBarsX,
+                    cuttingLength: cuttingLengthX.toFixed(2),
+                    formula: `Lx + 2×Ld + 0.42D - 2×(1d)`,
+                    unitWeight: unitWeightX.toFixed(3),
+                    weight: weightX
+                });
+                totalSteelWeight += weightX;
+
+                // Y-Direction (long span)
+                // Use bend deduction for Y-direction bars as well (if they are also bent-up)
+                const bendDeductionY = 2 * (1 * barDiaY / 1000);
+                const cuttingLengthY = Ly + (2 * LdY) + crankExtra - bendDeductionY;
+                const numBarsY = Math.ceil((Lx * 1000) / spacingY);
+                const weightY = numBarsY * cuttingLengthY * unitWeightY;
+
+                reinforcementItems.push({
+                    description: `Main reinforcement (Y-Dir - long span) - BENT-UP`,
+                    details: `${barDiaY} mm Ø @ ${spacingY} mm c/c`,
+                    numBars: numBarsY,
+                    cuttingLength: cuttingLengthY.toFixed(2),
+                    formula: `Ly + 2×Ld + 0.42D - 2×(1d)`,
                     unitWeight: unitWeightY.toFixed(3),
                     weight: weightY
                 });
@@ -1398,8 +1430,10 @@
                 const extraWeight = 0.20 * (weightX + weightY);
                 reinforcementItems.push({
                     description: `Edge strips & torsion reinforcement (approx.)`,
+                    details: `-`,
                     numBars: '-',
-                    barLength: '-',
+                    cuttingLength: '-',
+                    formula: '-',
                     unitWeight: '-',
                     weight: extraWeight
                 });
@@ -1419,35 +1453,46 @@
             // Build BOQ HTML
             let boqHTML = `
                 <div class="boq-card">
-                    <h3>📋 Bill of Quantities (As per BBS Guidelines)</h3>
+                    <h3>📋 Bill of Quantities (With Bent-up Bar Calculation)</h3>
                     <p><strong>Slab Plan:</strong> ${Lx.toFixed(2)} m (short span) x ${Ly.toFixed(2)} m (long span), Area = ${area.toFixed(2)} m²</p>
                     <p><strong>Overall Depth:</strong> ${overallDepth.toFixed(0)} mm</p>
                     <p><strong>Concrete Volume:</strong> ${concreteVolume.toFixed(2)} m³ (Grade M${fck})</p>
-                    <p><em>Unit Weight Formula used: D²/162 kg/m (as per IS code)</em></p>
+                    <p><strong>Unit Weight Formula:</strong> D²/162 kg/m (as per IS code)</p>
+                    <p><strong>Bent-up Bar Formula:</strong> L + 2×Ld + 0.42D - 2×(1d) (for 45° bends)</p>
                     
                     <h4 style="margin-top:15px;">Reinforcement Steel (Fe ${fy})</h4>
                     <table class="boq-table">
-                        <tr><th>Description</th><th>No. of Bars</th><th>Bar Length (m)</th><th>Unit Wt (kg/m)</th><th>Weight (kg)</th></tr>
+                        <tr>
+                            <th>Description</th>
+                            <th>Size</th>
+                            <th>No.</th>
+                            <th>Cutting Length (m)</th>
+                            <th>Formula</th>
+                            <th>Unit Wt (kg/m)</th>
+                            <th>Weight (kg)</th>
+                        </tr>
             `;
             reinforcementItems.forEach(item => {
                 boqHTML += `<tr>
                     <td>${item.description}</td>
+                    <td>${item.details}</td>
                     <td>${item.numBars}</td>
-                    <td>${item.barLength}</td>
+                    <td>${item.cuttingLength}</td>
+                    <td><small>${item.formula || '-'}</small></td>
                     <td>${item.unitWeight}</td>
                     <td>${item.weight ? item.weight.toFixed(2) : '-'}</td>
                 </tr>`;
             });
             boqHTML += `<tr style="font-weight:700; background:#f0f0f0;">
-                <td colspan="4">Subtotal (without wastage)</td>
+                <td colspan="6">Subtotal (without wastage)</td>
                 <td>${totalSteelWeight.toFixed(2)} kg</td>
             </tr>`;
             boqHTML += `<tr>
-                <td colspan="4">Wastage (${wastage*100}%)</td>
+                <td colspan="6">Wastage (${wastage*100}%)</td>
                 <td>${(totalSteelWeight * wastage).toFixed(2)} kg</td>
             </tr>`;
             boqHTML += `<tr style="font-weight:700; background:#e0e0e0;">
-                <td colspan="4">Total Steel Required</td>
+                <td colspan="6">Total Steel Required</td>
                 <td>${steelWithWastage.toFixed(2)} kg</td>
             </tr>`;
             boqHTML += `</table>`;
@@ -1458,7 +1503,7 @@
                 <p><strong>Labour Cost (₹ ${labourRate}/m²):</strong> ₹ ${labourCost.toFixed(2)}</p>
                 <p><strong>Shuttering Cost (₹ ${shutteringRate}/m²):</strong> ₹ ${shutteringCost.toFixed(2)}</p>
                 <p><strong>Total Material + Labour + Shuttering Cost:</strong> ₹ ${totalCost.toFixed(2)}</p>
-                <p style="font-size:0.9em; margin-top:10px;"><em>Note: Quantities calculated using standard BBS formulas from IS codes. Bend deduction and hook lengths as per PDF guidelines. Edge strips and torsion steel are estimated.</em></p>
+                <p style="font-size:0.9em; margin-top:10px;"><em>Note: Cutting length includes development length (Ld = 40d) and crank length (0.42D). Edge strips and torsion steel are estimated.</em></p>
             </div>
             `;
 
@@ -1532,28 +1577,40 @@
             // BOQ Summary
             checkPageSpace(80);
             doc.setFontSize(14);
-            doc.text("BILL OF QUANTITIES (BBS)", 14, y);
+            doc.text("BILL OF QUANTITIES (BBS - With Bent-up Bars)", 14, y);
             y += 8;
             doc.setFontSize(10);
             const area = designData.Lx * designData.Ly;
             const concreteVolume = area * (designData.overallDepth/1000);
             
-            // Simplified steel calculation
+            // Simplified steel calculation with bent-up bars
             const unitWeightX = (designData.barDiaX * designData.barDiaX) / 162;
             const unitWeightY = (designData.barDiaY * designData.barDiaY) / 162;
+            const LdX = 40 * designData.barDiaX / 1000;
+            const LdY = 40 * designData.barDiaY / 1000;
+            const crankExtra = 0.42 * (designData.overallDepth - designData.cover) / 1000;
+            const bendDeduction = 2 * (1 * designData.barDiaX / 1000);
+            
             let totalSteel = 0;
             if (designData.slabType === 'oneway') {
-                const numMain = Math.ceil((designData.Ly * 1000) / designData.spacingX);
-                totalSteel += numMain * (designData.Lx + 0.2) * unitWeightX;
-                const numDist = Math.ceil((designData.Lx * 1000) / designData.spacingY);
-                totalSteel += numDist * (designData.Ly + 0.2) * unitWeightY;
-            } else {
+                const cuttingLengthX = designData.Lx + 2*LdX + crankExtra - bendDeduction;
                 const numX = Math.ceil((designData.Ly * 1000) / designData.spacingX);
-                totalSteel += numX * (designData.Lx + 0.2) * unitWeightX;
+                totalSteel += numX * cuttingLengthX * unitWeightX;
+                
+                const cuttingLengthY = designData.Ly + 0.2;
                 const numY = Math.ceil((designData.Lx * 1000) / designData.spacingY);
-                totalSteel += numY * (designData.Ly + 0.2) * unitWeightY;
+                totalSteel += numY * cuttingLengthY * unitWeightY;
+            } else {
+                const cuttingLengthX = designData.Lx + 2*LdX + crankExtra - bendDeduction;
+                const numX = Math.ceil((designData.Ly * 1000) / designData.spacingX);
+                totalSteel += numX * cuttingLengthX * unitWeightX;
+                
+                const cuttingLengthY = designData.Ly + 2*LdY + crankExtra - bendDeduction;
+                const numY = Math.ceil((designData.Lx * 1000) / designData.spacingY);
+                totalSteel += numY * cuttingLengthY * unitWeightY;
                 totalSteel *= 1.15; // edge & torsion
             }
+            
             const wastage = parseFloat(document.getElementById('wastage').value) / 100;
             totalSteel *= (1 + wastage);
             
@@ -1572,7 +1629,7 @@
             doc.text(`Total cost: ₹ ${(concreteCost+steelCost+labourCost+shutteringCost).toFixed(2)}`, 20, y); y+=8;
 
             doc.setFontSize(8);
-            doc.text("Designed as per IS 456:2000 with Table 26 coefficients & BBS formulas", 105, 290, { align: 'center' });
+            doc.text("Designed as per IS 456:2000 with Table 26 coefficients & BBS formulas including bent-up bars", 105, 290, { align: 'center' });
 
             doc.save(`Slab_Design_${new Date().toISOString().slice(0,10)}.pdf`);
         }
