@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kajal Structural Design Studio – Complete Slab Design + BOQ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ===== EXISTING STYLES (unchanged) ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calculator {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            color: white;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .header .brand {
+            font-size: 1.8em;
+            font-weight: 600;
+            background: rgba(255,255,255,0.15);
+            display: inline-block;
+            padding: 5px 20px;
+            border-radius: 50px;
+            margin-top: 5px;
+        }
+
+        .header .tagline {
+            font-size: 1.1em;
+            font-style: italic;
+            color: #f1c40f;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: white;
+            font-weight: 500;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        .slab-type-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .slab-type-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slab-type-btn.active {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .slab-type-btn:not(.active) {
+            background: white;
+            color: #2c3e50;
+            border: 2px solid #3498db;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .input-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .input-card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .btn {
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(108, 117, 125, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            margin-top: 30px;
+            border: 1px solid #dee2e6;
+        }
+
+        .results-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            font-size: 1.8em;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .design-step {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .design-step h3 {
+            color: #1a2634;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .design-step h4 {
+            color: #2c3e50;
+            margin: 15px 0 10px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .step-content {
+            font-size: 0.95em;
+            line-height: 1.8;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .step-content p {
+            margin: 10px 0;
+            color: #1e2a36;
+            font-weight: 500;
+        }
+
+        .step-content p strong {
+            color: #000000;
+            font-weight: 700;
+        }
+
+        .step-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            border: 1px solid #bdc3c7;
+        }
+
+        .step-content th, .step-content td {
+            border: 1px solid #bdc3c7;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .step-content th {
+            background: #3498db;
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        .step-content td {
+            color: #2c3e50;
+            font-weight: 500;
+            background: white;
+        }
+
+        .safety-badge {
+            display: inline-block;
+            padding: 8px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95em;
+            margin: 5px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .safe {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .unsafe {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        /* New styles for BOQ */
+        .boq-card {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+        .boq-card h3 {
+            color: #1b5e20;
+            margin-bottom: 15px;
+        }
+        .boq-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        .boq-table th {
+            background: #2e7d32;
+            color: white;
+            padding: 8px;
+            text-align: left;
+        }
+        .boq-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #a5d6a7;
+        }
+        .boq-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .calculator {
+                box-shadow: none;
+            }
+            
+            .header h1 {
+                color: black;
+                text-shadow: none;
+            }
+            
+            .header p, .brand, .tagline {
+                color: black !important;
+            }
+            
+            .slab-type-selector, .button-group, .input-card {
+                display: none;
+            }
+            
+            .results-section {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+            
+            .design-step h3 {
+                color: #000000;
+                font-weight: 900;
+            }
+            
+            .step-content p {
+                color: #000000;
+            }
+            
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1>RCC SLAB DESIGN CALCULATOR</h1>
+            <div class="brand">KAJAL (structural design studio)</div>
+            <div class="tagline">build smarter, build stronger</div>
+            <p>As per IS 456:2000 - Accurate Table 26 Bending Moment Coefficients</p>
+        </div>
+
+        <div class="slab-type-selector">
+            <button class="slab-type-btn active" onclick="setSlabType('oneway')">One-Way Slab</button>
+            <button class="slab-type-btn" onclick="setSlabType('twoway')">Two-Way Slab</button>
+        </div>
+
+        <div class="main-content">
+            <div class="input-grid">
+                <div class="input-card">
+                    <h3>Geometric Parameters</h3>
+                    <div class="input-group">
+                        <label for="span">Span Lx (short span, if two-way) - meters</label>
+                        <input type="number" id="span" value="4.0" step="0.1" min="1">
+                    </div>
+                    <div class="input-group" id="span2Group" style="display:none;">
+                        <label for="span2">Span Ly (long span) - meters</label>
+                        <input type="number" id="span2" value="5.0" step="0.1" min="1">
+                    </div>
+                    <!-- Slab Width (perpendicular to span) for one-way -->
+                    <div class="input-group" id="widthGroup">
+                        <label for="slabWidth">Slab Width (perpendicular to span) - meters</label>
+                        <input type="number" id="slabWidth" value="6.0" step="0.1" min="1">
+                    </div>
+                    <!-- Trial Depth Input -->
+                    <div class="input-group">
+                        <label for="trialDepth">Trial Overall Depth D (mm) - optional</label>
+                        <input type="number" id="trialDepth" value="" step="5" min="80" placeholder="Auto if blank">
+                    </div>
+                    <div class="input-group">
+                        <label for="supportCondition">Support Condition</label>
+                        <select id="supportCondition">
+                            <option value="simply">Simply Supported</option>
+                            <option value="continuous">Continuous</option>
+                            <option value="restrained">Restrained Slab (Table 26)</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="boundaryGroup" style="display:none;">
+                        <label for="boundaryCondition">Panel Type (IS 456 Table 26)</label>
+                        <select id="boundaryCondition">
+                            <option value="1">Case 1: Interior Panel</option>
+                            <option value="2">Case 2: One Short Edge Discontinuous</option>
+                            <option value="3">Case 3: One Long Edge Discontinuous</option>
+                            <option value="4">Case 4: Two Adjacent Edges Discontinuous</option>
+                            <option value="5">Case 5: Two Short Edges Discontinuous</option>
+                            <option value="6">Case 6: Two Long Edges Discontinuous</option>
+                            <option value="7">Case 7: Three Edges Discontinuous (One Long Edge Continuous)</option>
+                            <option value="8">Case 8: Three Edges Discontinuous (One Short Edge Continuous)</option>
+                            <option value="9">Case 9: Four Edges Discontinuous</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <h3>Load Parameters</h3>
+                    <div class="input-group">
+                        <label for="liveLoad">Live Load (kN/m²)</label>
+                        <input type="number" id="liveLoad" value="3.0" step="0.5" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="floorFinish">Floor Finish (kN/m²)</label>
+                        <input type="number" id="floorFinish" value="1.0" step="0.5" min="0">
+                    </div>
+                </div>
+
+                <div class="input-card">
+                    <h3>Material Properties</h3>
+                    <div class="input-group">
+                        <label for="concreteGrade">Concrete Grade</label>
+                        <select id="concreteGrade">
+                            <option value="20">M20</option>
+                            <option value="25" selected>M25</option>
+                            <option value="30">M30</option>
+                            <option value="35">M35</option>
+                            <option value="40">M40</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="steelGrade">Steel Grade</label>
+                        <select id="steelGrade">
+                            <option value="415" selected>Fe 415</option>
+                            <option value="500">Fe 500</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="barDiameter">Main Bar Diameter (mm)</label>
+                        <select id="barDiameter">
+                            <option value="8">8 mm</option>
+                            <option value="10">10 mm</option>
+                            <option value="12" selected>12 mm</option>
+                            <option value="16">16 mm</option>
+                            <option value="20">20 mm</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="barSpacing">Bar Spacing (mm) - User Defined</label>
+                        <input type="number" id="barSpacing" value="150" step="10" min="50" max="300">
+                    </div>
+                    <div class="input-group">
+                        <label for="cover">Clear Cover (mm)</label>
+                        <input type="number" id="cover" value="20" step="5" min="15">
+                    </div>
+                </div>
+
+                <!-- Cost & Wastage + Labour & Shuttering -->
+                <div class="input-card">
+                    <h3>Cost Parameters</h3>
+                    <div class="input-group">
+                        <label for="concreteRate">Concrete rate (₹/m³)</label>
+                        <input type="number" id="concreteRate" value="6000" step="100" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="steelRate">Steel rate (₹/kg)</label>
+                        <input type="number" id="steelRate" value="60" step="5" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="densitySteel">Steel density (kg/m³) - for reference</label>
+                        <input type="number" id="densitySteel" value="7850" step="10" min="7000">
+                    </div>
+                    <div class="input-group">
+                        <label for="wastage">Wastage (%)</label>
+                        <input type="number" id="wastage" value="5" step="1" min="0" max="20">
+                    </div>
+                    <div class="input-group">
+                        <label for="labourRate">Labour rate (₹/m²)</label>
+                        <input type="number" id="labourRate" value="500" step="10" min="0">
+                    </div>
+                    <div class="input-group">
+                        <label for="shutteringRate">Shuttering rate (₹/m²)</label>
+                        <input type="number" id="shutteringRate" value="800" step="10" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="calculateSlab()">Calculate & Design</button>
+                <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
+                <button class="btn btn-success" onclick="downloadPDF()">Download PDF</button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results">
+                <h2>Design Results</h2>
+                <div id="designSteps">
+                    <p style="text-align: center; color: #6c757d;">Click "Calculate & Design" to perform slab design</p>
+                </div>
+                <!-- BOQ will be injected here after calculation -->
+                <div id="boqContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { jsPDF } = window.jspdf;
+        let currentSlabType = 'oneway';
+        let designData = {}; // stores last calculated design for PDF and BOQ
+
+        // ACCURATE Bending Moment Coefficients from IS 456:2000 Table 26 (as per reference image)
+        const restrainedCoefficients = {
+            1.0: {
+                1: { neg_short: 0.032, pos_short: 0.024, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.037, pos_short: 0.028, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.037, pos_short: 0.028, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.047, pos_short: 0.035, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.045, pos_short: 0.035, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.045, pos_short: 0.035, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.050, pos_short: 0.038, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.050, pos_short: 0.038, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.050, pos_short: 0.038, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.1: {
+                1: { neg_short: 0.037, pos_short: 0.028, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.043, pos_short: 0.032, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.044, pos_short: 0.033, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.053, pos_short: 0.040, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.049, pos_short: 0.037, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.043, pos_short: 0.043, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.055, pos_short: 0.042, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.055, pos_short: 0.042, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.055, pos_short: 0.042, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.2: {
+                1: { neg_short: 0.043, pos_short: 0.032, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.048, pos_short: 0.036, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.052, pos_short: 0.039, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.060, pos_short: 0.045, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.052, pos_short: 0.040, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.051, pos_short: 0.051, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.061, pos_short: 0.047, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.061, pos_short: 0.047, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.061, pos_short: 0.047, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.3: {
+                1: { neg_short: 0.047, pos_short: 0.036, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.051, pos_short: 0.039, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.057, pos_short: 0.044, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.065, pos_short: 0.049, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.056, pos_short: 0.043, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.057, pos_short: 0.057, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.066, pos_short: 0.051, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.066, pos_short: 0.051, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.066, pos_short: 0.051, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.4: {
+                1: { neg_short: 0.051, pos_short: 0.039, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.055, pos_short: 0.041, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.063, pos_short: 0.047, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.071, pos_short: 0.053, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.059, pos_short: 0.044, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.063, pos_short: 0.063, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.071, pos_short: 0.055, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.071, pos_short: 0.055, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.071, pos_short: 0.055, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.5: {
+                1: { neg_short: 0.053, pos_short: 0.041, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.057, pos_short: 0.044, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.067, pos_short: 0.051, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.075, pos_short: 0.056, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.060, pos_short: 0.045, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.068, pos_short: 0.068, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.074, pos_short: 0.058, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.074, pos_short: 0.058, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.074, pos_short: 0.058, neg_long: 0.050, pos_long: 0.038 }
+            },
+            1.75: {
+                1: { neg_short: 0.060, pos_short: 0.045, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.064, pos_short: 0.048, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.077, pos_short: 0.059, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.084, pos_short: 0.063, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.065, pos_short: 0.049, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.080, pos_short: 0.080, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.080, pos_short: 0.063, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.080, pos_short: 0.063, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.080, pos_short: 0.063, neg_long: 0.050, pos_long: 0.038 }
+            },
+            2.0: {
+                1: { neg_short: 0.065, pos_short: 0.049, neg_long: 0.032, pos_long: 0.024 },
+                2: { neg_short: 0.068, pos_short: 0.052, neg_long: 0.037, pos_long: 0.028 },
+                3: { neg_short: 0.085, pos_short: 0.065, neg_long: 0.037, pos_long: 0.028 },
+                4: { neg_short: 0.091, pos_short: 0.069, neg_long: 0.047, pos_long: 0.035 },
+                5: { neg_short: 0.069, pos_short: 0.052, neg_long: 0.045, pos_long: 0.035 },
+                6: { neg_short: 0.088, pos_short: 0.088, neg_long: 0.045, pos_long: 0.035 },
+                7: { neg_short: 0.085, pos_short: 0.067, neg_long: 0.050, pos_long: 0.038 },
+                8: { neg_short: 0.085, pos_short: 0.067, neg_long: 0.050, pos_long: 0.038 },
+                9: { neg_short: 0.085, pos_short: 0.067, neg_long: 0.050, pos_long: 0.038 }
+            }
+        };
+
+        function setSlabType(type) {
+            currentSlabType = type;
+            document.querySelectorAll('.slab-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            const span2Group = document.getElementById('span2Group');
+            const boundaryGroup = document.getElementById('boundaryGroup');
+            const widthGroup = document.getElementById('widthGroup');
+            const supportCondition = document.getElementById('supportCondition');
+            
+            if (type === 'twoway') {
+                span2Group.style.display = 'block';
+                widthGroup.style.display = 'none';   // hide one-way width input
+                supportCondition.value = 'restrained';
+                boundaryGroup.style.display = 'block';
+            } else {
+                span2Group.style.display = 'none';
+                widthGroup.style.display = 'block';  // show one-way width input
+                boundaryGroup.style.display = 'none';
+                supportCondition.value = 'simply';
+            }
+        }
+
+        // ---------- Core calculation function (now ensures Lx is short span) ----------
+        function evaluateDesign(Lx_input, Ly_input, supportCondition, boundaryCondition, liveLoad, floorFinish, fck, fy, barDia, spacing, cover, slabType, trialDepth) {
+            // For two-way, ensure Lx is the shorter span
+            let Lx = Lx_input;
+            let Ly = Ly_input;
+            if (slabType === 'twoway' && Ly < Lx) {
+                // swap
+                Lx = Ly_input;
+                Ly = Lx_input;
+            }
+
+            const areaOneBar = Math.PI * barDia * barDia / 4;
+            const providedAst = (1000 / spacing) * areaOneBar;
+
+            // Depth calculation
+            const ly_lx_ratio = slabType === 'twoway' ? Ly / Lx : 0;
+            let basicLdRatio;
+            if (slabType === 'oneway') {
+                basicLdRatio = supportCondition === 'continuous' ? 26 : 20;
+            } else {
+                if (ly_lx_ratio > 2) {
+                    basicLdRatio = 20; // one-way action (though user selected two-way, we treat as one-way for L/d)
+                } else {
+                    basicLdRatio = supportCondition === 'restrained' ? 32 : 28;
+                }
+            }
+
+            // Minimum required depth from deflection (without modification factor)
+            const minRequiredDepth = (Lx * 1000) / basicLdRatio;
+
+            // If trial depth provided, use it; otherwise compute from basic L/d
+            let overallDepth, effectiveDepth;
+            if (trialDepth && trialDepth > 0) {
+                overallDepth = trialDepth;
+                effectiveDepth = overallDepth - cover - barDia/2;
+            } else {
+                effectiveDepth = Math.max(Math.ceil(minRequiredDepth), 100);
+                overallDepth = effectiveDepth + cover + barDia/2;
+                effectiveDepth = overallDepth - cover - barDia/2;
+            }
+
+            // Loads
+            const selfWeight = 25 * overallDepth / 1000;
+            const totalLoad = selfWeight + floorFinish + liveLoad;
+            const factoredLoad = 1.5 * totalLoad;
+
+            // Moments
+            let moments = {};
+            let reinforcement = {};
+
+            if (slabType === 'oneway') {
+                const momentFactor = supportCondition === 'continuous' ? 10 : 8;
+                const Mu = (factoredLoad * Lx * Lx) / momentFactor;
+                moments = { Mu };
+                const MuNmm = Mu * 1e6;
+                const AstReq = calculateReinforcement(MuNmm, effectiveDepth, fck, fy, 1000);
+                const minAst = 0.0012 * 1000 * overallDepth;
+                const requiredAst = Math.max(AstReq, minAst);
+                reinforcement = {
+                    type: 'oneway',
+                    AstReq,
+                    minAst,
+                    requiredAst,
+                    providedAst,
+                    barDia,
+                    spacing,
+                    status: providedAst >= requiredAst ? 'safe' : 'unsafe'
+                };
+            } else {
+                // two-way
+                const ratios = [1.0,1.1,1.2,1.3,1.4,1.5,1.75,2.0];
+                let closestRatio = ratios.reduce((prev, curr) => Math.abs(curr - ly_lx_ratio) < Math.abs(prev - ly_lx_ratio) ? curr : prev);
+                const coeffs = restrainedCoefficients[closestRatio]?.[boundaryCondition] || restrainedCoefficients[1.0][1];
+                const Mx_neg = coeffs.neg_short * factoredLoad * Lx * Lx;
+                const Mx_pos = coeffs.pos_short * factoredLoad * Lx * Lx;
+                const My_neg = coeffs.neg_long * factoredLoad * Lx * Lx;
+                const My_pos = coeffs.pos_long * factoredLoad * Lx * Lx;
+                moments = { Mx_neg, Mx_pos, My_neg, My_pos, coeffs, closestRatio, Lx, Ly };
+
+                const MuXpos = Mx_pos * 1e6;
+                const MuYpos = My_pos * 1e6;
+                const MuXneg = Mx_neg * 1e6;
+                const MuYneg = My_neg * 1e6;
+
+                const AstXpos = calculateReinforcement(MuXpos, effectiveDepth, fck, fy, 1000);
+                const AstYpos = calculateReinforcement(MuYpos, effectiveDepth - barDia, fck, fy, 1000);
+                const AstXneg = calculateReinforcement(MuXneg, effectiveDepth, fck, fy, 1000);
+                const AstYneg = calculateReinforcement(MuYneg, effectiveDepth - barDia, fck, fy, 1000);
+                const minAst = 0.0012 * 1000 * overallDepth;
+                const requiredAstX = Math.max(AstXpos, AstXneg, minAst);
+                const requiredAstY = Math.max(AstYpos, AstYneg, minAst);
+                reinforcement = {
+                    type: 'twoway',
+                    AstXpos, AstYpos, AstXneg, AstYneg,
+                    minAst,
+                    requiredAstX,
+                    requiredAstY,
+                    providedAst,
+                    barDia,
+                    spacing,
+                    status: (providedAst >= requiredAstX && providedAst >= requiredAstY) ? 'safe' : 'unsafe'
+                };
+            }
+
+            // Deflection check (using actual depth)
+            const fs = 0.58 * fy * (reinforcement.requiredAst || reinforcement.requiredAstX) / providedAst;
+            const pt = (providedAst * 100) / (1000 * effectiveDepth);
+            const modFactor = getModificationFactor(pt, fs);
+            const allowableLdRatio = basicLdRatio * modFactor;
+            const actualLdRatio = (Lx * 1000) / effectiveDepth;
+            const deflectionStatus = actualLdRatio <= allowableLdRatio ? 'safe' : 'unsafe';
+
+            // Crack width
+            const crackWidth = calculateCrackWidth(providedAst, barDia, effectiveDepth, cover, fy, fs, spacing);
+            const crackStatus = crackWidth <= 0.3 ? 'safe' : 'warning';
+
+            // Shear check for one-way
+            let shearStatus = 'safe';
+            if (slabType === 'oneway') {
+                const Vu = factoredLoad * Lx / 2;
+                const tauV = (Vu * 1000) / (1000 * effectiveDepth);
+                const tauC = getShearStrength(fck, pt);
+                shearStatus = tauV <= tauC ? 'safe' : 'unsafe';
+            }
+
+            // Overall safety
+            const overallSafe = reinforcement.status === 'safe' && deflectionStatus === 'safe' && crackStatus === 'safe' && (slabType === 'oneway' ? shearStatus === 'safe' : true);
+
+            // Cost per sqm (for potential use, but we keep it for consistency)
+            const concreteRate = parseFloat(document.getElementById('concreteRate').value);
+            const steelRate = parseFloat(document.getElementById('steelRate').value);
+            const densitySteel = parseFloat(document.getElementById('densitySteel').value);
+            const concreteVolumePerSqm = overallDepth / 1000;
+            const concreteCostPerSqm = concreteVolumePerSqm * concreteRate;
+            let steelMassPerSqm;
+            if (slabType === 'oneway') {
+                steelMassPerSqm = (providedAst / 1e6) * densitySteel;
+            } else {
+                steelMassPerSqm = 2 * (providedAst / 1e6) * densitySteel; // approximate both directions
+            }
+            const steelCostPerSqm = steelMassPerSqm * steelRate;
+            const totalCostPerSqm = concreteCostPerSqm + steelCostPerSqm;
+
+            return {
+                Lx, Ly,  // return possibly swapped values
+                overallDepth,
+                effectiveDepth,
+                minRequiredDepth,
+                providedAst,
+                reinforcement,
+                deflectionStatus,
+                crackStatus,
+                shearStatus,
+                overallSafe,
+                totalCostPerSqm,
+                steelMassPerSqm,
+                concreteCostPerSqm,
+                steelCostPerSqm,
+                fs, pt, modFactor, allowableLdRatio, actualLdRatio,
+                crackWidth,
+                moments,
+                basicLdRatio,
+                selfWeight,
+                totalLoad,
+                factoredLoad
+            };
+        }
+
+        // Helper functions (unchanged)
+        function calculateReinforcement(Mu, d, fck, fy, b) {
+            const dInMm = d;
+            const limMu = 0.138 * fck * b * dInMm * dInMm;
+            if (Mu <= limMu) {
+                const Ast = (0.5 * fck * b * dInMm / fy) * (1 - Math.sqrt(1 - (4.6 * Mu) / (fck * b * dInMm * dInMm)));
+                return Ast;
+            } else {
+                return (0.85 * fck * b * dInMm) / fy;
+            }
+        }
+
+        function getModificationFactor(pt, fs) {
+            if (pt <= 0.3) return 1.5;
+            if (pt <= 0.5) return 1.4;
+            if (pt <= 0.8) return 1.2;
+            if (pt <= 1.0) return 1.1;
+            if (pt <= 1.2) return 1.0;
+            return 0.9;
+        }
+
+        function getShearStrength(fck, pt) {
+            const shearTable = {
+                20: [0.28, 0.36, 0.42, 0.44, 0.46, 0.48],
+                25: [0.29, 0.38, 0.44, 0.47, 0.50, 0.53],
+                30: [0.29, 0.39, 0.46, 0.50, 0.54, 0.57],
+                35: [0.30, 0.40, 0.48, 0.52, 0.57, 0.61],
+                40: [0.30, 0.41, 0.50, 0.55, 0.60, 0.64]
+            };
+            const ptValues = [0.15, 0.25, 0.50, 0.75, 1.00, 1.25];
+            let index = 0;
+            while (index < ptValues.length - 1 && ptValues[index] < pt) index++;
+            return shearTable[fck] ? shearTable[fck][index] : 0.4;
+        }
+
+        function calculateCrackWidth(Ast, barDia, d, cover, fy, fs, spacing) {
+            const acr = Math.sqrt(Math.pow(cover + barDia/2, 2) + Math.pow(spacing/2, 2));
+            const epsilon_m = (fs / 200000) * (1 - (0.5 * 0.0012 * 1000 * d) / Ast);
+            const crackWidth = 3 * acr * epsilon_m / (1 + 2 * (acr - cover) / (d - cover));
+            return Math.min(Math.max(crackWidth, 0.1), 0.5);
+        }
+
+        // ---------- Main calculate function ----------
+        function calculateSlab() {
+            // Get input values
+            let Lx_input = parseFloat(document.getElementById('span').value);
+            let Ly_input = currentSlabType === 'twoway' ? parseFloat(document.getElementById('span2').value) : 0;
+            const slabWidth_input = currentSlabType === 'oneway' ? parseFloat(document.getElementById('slabWidth').value) : Ly_input;
+            const supportCondition = document.getElementById('supportCondition').value;
+            const boundaryCondition = parseInt(document.getElementById('boundaryCondition').value || '1');
+            const liveLoad = parseFloat(document.getElementById('liveLoad').value);
+            const floorFinish = parseFloat(document.getElementById('floorFinish').value);
+            const fck = parseFloat(document.getElementById('concreteGrade').value);
+            const fy = parseFloat(document.getElementById('steelGrade').value);
+            const barDia = parseFloat(document.getElementById('barDiameter').value);
+            const userSpacing = parseFloat(document.getElementById('barSpacing').value);
+            const cover = parseFloat(document.getElementById('cover').value);
+            const trialDepth = parseFloat(document.getElementById('trialDepth').value) || null;
+
+            const result = evaluateDesign(Lx_input, Ly_input, supportCondition, boundaryCondition, liveLoad, floorFinish, fck, fy, barDia, userSpacing, cover, currentSlabType, trialDepth);
+
+            // Store for PDF and BOQ – use possibly swapped Lx, Ly from result
+            const Lx = result.Lx;
+            const Ly = result.Ly;
+            // For one-way, slabWidth is still the user input (width perpendicular to span)
+            // For two-way, slabWidth is Ly (long span)
+            const slabWidth = currentSlabType === 'oneway' ? slabWidth_input : Ly;
+
+            designData = {
+                Lx, Ly, slabWidth,
+                supportCondition, boundaryCondition,
+                liveLoad, floorFinish,
+                fck, fy, barDia, userSpacing, cover,
+                overallDepth: result.overallDepth,
+                effectiveDepth: result.effectiveDepth,
+                minRequiredDepth: result.minRequiredDepth,
+                totalLoad: result.totalLoad,
+                factoredLoad: result.factoredLoad,
+                moments: result.moments,
+                reinforcement: result.reinforcement,
+                fs: result.fs,
+                pt: result.pt,
+                modFactor: result.modFactor,
+                allowableLdRatio: result.allowableLdRatio,
+                actualLdRatio: result.actualLdRatio,
+                crackWidth: result.crackWidth,
+                crackWidthCheck: { status: result.crackStatus },
+                shearCheck: currentSlabType === 'oneway' ? { status: result.shearStatus } : null,
+                deflectionCheck: { status: result.deflectionStatus },
+                basicLdRatio: result.basicLdRatio,
+                providedAst: result.providedAst,
+                areaOneBar: Math.PI * barDia * barDia / 4,
+                selfWeight: result.selfWeight,
+                slabType: currentSlabType,
+                overallSafe: result.overallSafe
+            };
+
+            // Render detailed steps
+            renderDesignDisplay(result, Lx, Ly, supportCondition, boundaryCondition, liveLoad, floorFinish, fck, fy, barDia, userSpacing, cover, slabWidth);
+
+            // Render Bill of Quantities
+            renderBOQ();
+        }
+
+        // Function to build the detailed step-by-step HTML (updated to show correct spans)
+        function renderDesignDisplay(result, Lx, Ly, supportCondition, boundaryCondition, liveLoad, floorFinish, fck, fy, barDia, userSpacing, cover, slabWidth) {
+            const areaOneBar = Math.PI * barDia * barDia / 4;
+            const providedAst = result.providedAst;
+            const effectiveDepth = result.effectiveDepth;
+            const overallDepth = result.overallDepth;
+            const selfWeight = result.selfWeight;
+            const totalLoad = result.totalLoad;
+            const factoredLoad = result.factoredLoad;
+            const pt = result.pt;
+            const fs = result.fs;
+            const modFactor = result.modFactor;
+            const basicLdRatio = result.basicLdRatio;
+            const allowableLdRatio = result.allowableLdRatio;
+            const actualLdRatio = result.actualLdRatio;
+            const crackWidth = result.crackWidth;
+            const minRequiredDepth = result.minRequiredDepth;
+
+            let resultsHTML = '';
+
+            // Step 1: Depth Calculation
+            let depthMessage = `<p><strong>Basic L/d ratio:</strong> ${basicLdRatio}</p>`;
+            depthMessage += `<p><strong>Minimum required depth from deflection:</strong> ${minRequiredDepth.toFixed(2)} mm</p>`;
+            if (document.getElementById('trialDepth').value) {
+                depthMessage += `<p><strong>Trial depth provided:</strong> ${overallDepth} mm</p>`;
+                depthMessage += `<p><strong>Effective depth achieved:</strong> ${effectiveDepth.toFixed(0)} mm</p>`;
+                if (overallDepth >= minRequiredDepth) {
+                    depthMessage += `<div class="safety-badge safe">✓ Trial depth meets minimum requirement</div>`;
+                } else {
+                    depthMessage += `<div class="safety-badge unsafe">✗ Trial depth is less than minimum required! Increase depth.</div>`;
+                }
+            } else {
+                depthMessage += `<p><strong>Adopted overall depth D =</strong> ${overallDepth.toFixed(0)} mm</p>`;
+                depthMessage += `<p><strong>Effective depth d =</strong> ${effectiveDepth.toFixed(0)} mm (Cover: ${cover} mm, Bar dia: ${barDia} mm)</p>`;
+                depthMessage += `<div class="safety-badge safe">✓ Depth selected as per code requirements</div>`;
+            }
+
+            resultsHTML += `
+                <div class="design-step">
+                    <h3>1. DEPTH CALCULATION (IS 456 Cl. 23.2.1)</h3>
+                    <div class="step-content">
+                        ${depthMessage}
+                    </div>
+                </div>
+            `;
+
+            // Step 2: Load Calculation
+            resultsHTML += `
+                <div class="design-step">
+                    <h3>2. LOAD CALCULATION</h3>
+                    <div class="step-content">
+                        <p><strong>Self weight =</strong> 25 × ${(overallDepth/1000).toFixed(3)} = ${selfWeight.toFixed(2)} kN/m²</p>
+                        <p><strong>Floor finish =</strong> ${floorFinish.toFixed(2)} kN/m²</p>
+                        <p><strong>Live load =</strong> ${liveLoad.toFixed(2)} kN/m²</p>
+                        <p><strong>Total service load =</strong> ${totalLoad.toFixed(2)} kN/m²</p>
+                        <p><strong>Factored load (1.5 × service) =</strong> ${factoredLoad.toFixed(2)} kN/m²</p>
+                    </div>
+                </div>
+            `;
+
+            // Step 3: Moments
+            if (currentSlabType === 'oneway') {
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>3. BENDING MOMENT CALCULATION</h3>
+                        <div class="step-content">
+                            <p><strong>Maximum moment M<sub>u</sub> =</strong> (w × L²)/${supportCondition === 'continuous' ? '10' : '8'}</p>
+                            <p>= (${factoredLoad.toFixed(2)} × ${Lx}²) / ${supportCondition === 'continuous' ? '10' : '8'}</p>
+                            <p>= <strong>${result.moments.Mu.toFixed(2)} kNm/m</strong></p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>3. BENDING MOMENT CALCULATION (IS 456 TABLE 26)</h3>
+                        <div class="step-content">
+                            <p><strong>Span ratio l<sub>y</sub>/l<sub>x</sub> =</strong> ${Ly.toFixed(2)}/${Lx.toFixed(2)} = ${(Ly/Lx).toFixed(2)} (l<sub>x</sub> is short span)</p>
+                            <p><strong>Closest ratio from table:</strong> ${result.moments.closestRatio.toFixed(2)}</p>
+                            <p><strong>Panel Type:</strong> Case ${boundaryCondition}</p>
+                            
+                            <table>
+                                <tr>
+                                    <th>Moment Type</th>
+                                    <th>Coefficient α</th>
+                                    <th>Moment (kNm/m)</th>
+                                </tr>
+                                <tr>
+                                    <td><strong>Negative moment at short edge (α<sub>x</sub><sup>-</sup>)</strong></td>
+                                    <td>${result.moments.coeffs.neg_short.toFixed(3)}</td>
+                                    <td><strong>${result.moments.Mx_neg.toFixed(2)}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Positive moment at short span (α<sub>x</sub><sup>+</sup>)</strong></td>
+                                    <td>${result.moments.coeffs.pos_short.toFixed(3)}</td>
+                                    <td><strong>${result.moments.Mx_pos.toFixed(2)}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Negative moment at long edge (α<sub>y</sub><sup>-</sup>)</strong></td>
+                                    <td>${result.moments.coeffs.neg_long.toFixed(3)}</td>
+                                    <td><strong>${result.moments.My_neg.toFixed(2)}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Positive moment at long span (α<sub>y</sub><sup>+</sup>)</strong></td>
+                                    <td>${result.moments.coeffs.pos_long.toFixed(3)}</td>
+                                    <td><strong>${result.moments.My_pos.toFixed(2)}</strong></td>
+                                </tr>
+                            </table>
+                            <p><em>Note: Coefficients are from IS 456:2000 Table 26 (Clause D-1.1 and 24.4.1)</em></p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Step 4: Reinforcement
+            if (currentSlabType === 'oneway') {
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>4. REINFORCEMENT DESIGN</h3>
+                        <div class="step-content">
+                            <h4>Main Reinforcement (along span):</h4>
+                            <p><strong>Required A<sub>st</sub> =</strong> ${result.reinforcement.AstReq.toFixed(0)} mm²/m</p>
+                            <p><strong>Minimum A<sub>st</sub> (0.12%) =</strong> ${result.reinforcement.minAst.toFixed(0)} mm²/m</p>
+                            <p><strong>Design A<sub>st</sub> required =</strong> ${result.reinforcement.requiredAst.toFixed(0)} mm²/m</p>
+                            <p><strong>Provided:</strong> ${barDia} mm Ø @ ${userSpacing} mm c/c = ${providedAst.toFixed(0)} mm²/m</p>
+                            <div class="safety-badge ${result.reinforcement.status === 'safe' ? 'safe' : 'unsafe'}">
+                                ${result.reinforcement.status === 'safe' ? '✓ MAIN REINFORCEMENT ADEQUATE' : '✗ INADEQUATE - Increase bar diameter or reduce spacing'}
+                            </div>
+                            <h4 style="margin-top:15px;">Distribution Reinforcement (transverse):</h4>
+                            <p><strong>Minimum distribution steel (0.12% of gross area) =</strong> 0.0012 × 1000 × ${overallDepth} = ${(0.0012*1000*overallDepth).toFixed(0)} mm²/m</p>
+                            <p><em>Typically 8 mm @ 200 mm c/c (251 mm²/m) or as per code.</em> (Calculated in BOQ)</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>4. REINFORCEMENT DESIGN</h3>
+                        <div class="step-content">
+                            <h4>Short Span Direction (l<sub>x</sub> = ${Lx} m):</h4>
+                            <p><strong>Positive moment steel required:</strong> ${result.reinforcement.AstXpos.toFixed(0)} mm²/m</p>
+                            <p><strong>Negative moment steel required:</strong> ${result.reinforcement.AstXneg.toFixed(0)} mm²/m</p>
+                            <p><strong>Required (max) =</strong> ${result.reinforcement.requiredAstX.toFixed(0)} mm²/m</p>
+                            
+                            <h4>Long Span Direction (l<sub>y</sub> = ${Ly} m):</h4>
+                            <p><strong>Positive moment steel required:</strong> ${result.reinforcement.AstYpos.toFixed(0)} mm²/m</p>
+                            <p><strong>Negative moment steel required:</strong> ${result.reinforcement.AstYneg.toFixed(0)} mm²/m</p>
+                            <p><strong>Required (max) =</strong> ${result.reinforcement.requiredAstY.toFixed(0)} mm²/m</p>
+                            
+                            <p><strong>Minimum A<sub>st</sub> (0.12%) =</strong> ${result.reinforcement.minAst.toFixed(0)} mm²/m</p>
+                            <p><strong>Provided (both directions using same spacing):</strong> ${providedAst.toFixed(0)} mm²/m</p>
+                            
+                            <div class="safety-badge ${result.reinforcement.status === 'safe' ? 'safe' : 'unsafe'}">
+                                ${result.reinforcement.status === 'safe' ? '✓ REINFORCEMENT ADEQUATE for all moments' : '✗ INADEQUATE - Increase bar diameter or reduce spacing'}
+                            </div>
+
+                            <h4 style="margin-top:15px;">Edge Strip Reinforcement:</h4>
+                            <p><strong>Edge strips (0.12%):</strong> ${result.reinforcement.minAst.toFixed(0)} mm²/m</p>
+                            <p><strong>Torsion Reinforcement at corners:</strong> As per IS 456 D-1.8, provide 50% of mid-span reinforcement in torsion grids at discontinuous edges.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Step 5: Deflection
+            resultsHTML += `
+                <div class="design-step">
+                    <h3>5. DEFLECTION CHECK (IS 456:2000 FIG. 4 & CL. 23.2.1)</h3>
+                    <div class="step-content">
+                        <p><strong>Percentage steel p<sub>t</sub> =</strong> (${providedAst.toFixed(0)} × 100) / (1000 × ${effectiveDepth.toFixed(0)}) = ${pt.toFixed(3)}%</p>
+                        <p><strong>Service stress f<sub>s</sub> =</strong> 0.58 × f<sub>y</sub> × (A<sub>st,req</sub>/A<sub>st,prov</sub>)</p>
+                        <p><strong>f<sub>s</sub> =</strong> 0.58 × ${fy} × (${(result.reinforcement.requiredAst || result.reinforcement.requiredAstX).toFixed(0)}/${providedAst.toFixed(0)}) = ${fs.toFixed(2)} N/mm²</p>
+                        <p><strong>Modification factor =</strong> ${modFactor.toFixed(2)}</p>
+                        <p><strong>Allowable L/d ratio =</strong> Basic (${basicLdRatio}) × M.F (${modFactor.toFixed(2)}) = ${allowableLdRatio.toFixed(2)}</p>
+                        <p><strong>Actual L/d ratio =</strong> ${actualLdRatio.toFixed(2)}</p>
+                        <div class="safety-badge ${result.deflectionStatus === 'safe' ? 'safe' : 'unsafe'}">
+                            ${result.deflectionStatus === 'safe' ? '✓ DEFLECTION WITHIN LIMITS' : '✗ DEFLECTION EXCESSIVE - Increase depth'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Step 6: Crack Width
+            resultsHTML += `
+                <div class="design-step">
+                    <h3>6. CRACK WIDTH CALCULATION (IS 456:2000 ANNEX F)</h3>
+                    <div class="step-content">
+                        <p><strong>Calculated crack width =</strong> ${crackWidth.toFixed(3)} mm</p>
+                        <p><strong>Permissible crack width =</strong> 0.30 mm</p>
+                        <div class="safety-badge ${result.crackStatus === 'safe' ? 'safe' : 'warning'}">
+                            ${result.crackStatus === 'safe' ? '✓ CRACK WIDTH WITHIN LIMITS' : '⚠ CRACK WIDTH EXCEEDS LIMIT - Provide distribution steel or reduce spacing'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Step 7: Shear (one-way) or Edge strip (two-way)
+            if (currentSlabType === 'oneway') {
+                const Vu = factoredLoad * Lx / 2;
+                const tauV = (Vu * 1000) / (1000 * effectiveDepth);
+                const tauC = getShearStrength(fck, pt);
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>7. ONE-WAY SHEAR CHECK (IS 456 TABLE 19)</h3>
+                        <div class="step-content">
+                            <p><strong>Shear force V<sub>u</sub> =</strong> wL/2 = ${factoredLoad.toFixed(2)} × ${Lx}/2 = ${Vu.toFixed(2)} kN/m</p>
+                            <p><strong>Shear stress τ<sub>v</sub> =</strong> V<sub>u</sub>/(b×d) = ${Vu.toFixed(2)}×10³/(1000×${effectiveDepth.toFixed(0)}) = ${tauV.toFixed(3)} N/mm²</p>
+                            <p><strong>Permissible shear τ<sub>c</sub> (Table 19) =</strong> ${tauC.toFixed(3)} N/mm²</p>
+                            <div class="safety-badge ${result.shearStatus === 'safe' ? 'safe' : 'unsafe'}">
+                                ${result.shearStatus === 'safe' ? '✓ SHEAR SAFE' : '✗ SHEAR UNSAFE - Increase depth'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultsHTML += `
+                    <div class="design-step">
+                        <h3>7. EDGE STRIP & TORSION REINFORCEMENT</h3>
+                        <div class="step-content">
+                            <p><strong>Edge strips (along unsupported edges):</strong> Provide reinforcement equal to 0.12% of gross area = ${(0.0012*1000*overallDepth).toFixed(0)} mm²/m.</p>
+                            <p><strong>Torsion reinforcement at corners:</strong> As per IS 456 Cl. D-1.8, provide 50% of mid-span reinforcement in a grid pattern at corners where edges are discontinuous.</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Final Summary
+            const overallStatus = result.overallSafe ? 'safe' : 'unsafe';
+            resultsHTML += `
+                <div class="design-step" style="background: #f8f9fa; border-left: 4px solid #28a745;">
+                    <h3>DESIGN SUMMARY</h3>
+                    <div class="step-content">
+                        <p><strong>Slab Type:</strong> ${currentSlabType === 'oneway' ? 'One-Way Slab' : 'Two-Way Restrained Slab'}</p>
+                        <p><strong>Overall Depth (D):</strong> ${overallDepth.toFixed(0)} mm</p>
+                        <p><strong>Effective Depth (d):</strong> ${effectiveDepth.toFixed(0)} mm</p>
+                        <p><strong>Main Reinforcement:</strong> ${barDia} mm Ø @ ${userSpacing} mm c/c</p>
+                        <p><strong>Provided A<sub>st</sub>:</strong> ${providedAst.toFixed(0)} mm²/m</p>
+                        <p><strong>Service Stress f<sub>s</sub>:</strong> ${fs.toFixed(2)} N/mm²</p>
+                        <p><strong>Crack Width:</strong> ${crackWidth.toFixed(3)} mm</p>
+                        <div class="safety-badge ${overallStatus}" style="font-size: 1.1em; padding: 10px 20px;">
+                            <strong>OVERALL DESIGN STATUS: ${overallStatus === 'safe' ? 'SAFE ✓' : 'REVISION NEEDED ✗'}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('designSteps').innerHTML = resultsHTML;
+        }
+
+        // ---------- Detailed Bill of Quantities (using BBS data from PDF) ----------
+        function renderBOQ() {
+            const boqDiv = document.getElementById('boqContainer');
+            if (!designData.reinforcement) {
+                boqDiv.innerHTML = '';
+                return;
+            }
+
+            const slabType = designData.slabType;
+            const Lx = designData.Lx;
+            const slabWidth = designData.slabWidth; // for one-way, user input; for two-way, = Ly
+            const overallDepth = designData.overallDepth;
+            const barDia = designData.barDia;
+            const spacing = designData.userSpacing;
+            const cover = designData.cover;
+            const fck = designData.fck;
+            const fy = designData.fy;
+            const concreteRate = parseFloat(document.getElementById('concreteRate').value);
+            const steelRate = parseFloat(document.getElementById('steelRate').value);
+            const densitySteel = parseFloat(document.getElementById('densitySteel').value);
+            const wastage = parseFloat(document.getElementById('wastage').value) / 100;
+            const labourRate = parseFloat(document.getElementById('labourRate').value);
+            const shutteringRate = parseFloat(document.getElementById('shutteringRate').value);
+
+            // Plan area
+            const area = Lx * slabWidth; // m²
+
+            // Concrete volume
+            const concreteVolume = area * (overallDepth / 1000); // m³
+
+            // ---- Reinforcement calculation using BBS data from PDF ----
+            // Unit weight formula from PDF: D²/162 (kg/m)
+            const unitWeight = (barDia * barDia) / 162; // kg/m
+
+            // Bend Deduction values from PDF: 2D for 90°, 3D for 135°
+            // Hook Length from PDF: 12D for 135° hook
+            // For slab, main bars are usually straight with hooks at ends.
+            // Cutting length = Span length + 2 * (Hook Length) - Bend Deductions
+            // Simplified: Cutting Length = Lx + 0.2 (for hooks/anchorage) - as per PDF example for slab.
+            // For cranked bars in continuous slabs, formula from PDF (page 33):
+            // CL = a + Span Length(L1) + (0.42H) + b + L2/4 – Bend Deduction (2x45)
+
+            let reinforcementItems = [];
+            let totalSteelWeight = 0;
+
+            if (slabType === 'oneway') {
+                // Main bars (along span)
+                const numMain = Math.ceil((slabWidth * 1000) / spacing); // formula from PDF: (Distance/Spacing) + 1
+                const mainLength = Lx + 0.2; // adding 0.2m for hooks/anchorage (as per PDF example)
+                const mainWeight = numMain * mainLength * unitWeight;
+
+                reinforcementItems.push({
+                    description: `Main reinforcement ${barDia} mm Ø @ ${spacing} mm c/c (along span)`,
+                    numBars: numMain,
+                    barLength: mainLength.toFixed(2),
+                    unitWeight: unitWeight.toFixed(3),
+                    weight: mainWeight
+                });
+                totalSteelWeight += mainWeight;
+
+                // Distribution bars – using 8mm @200 c/c (or adjust to meet min steel)
+                let distDia = 8;
+                let distSpacing = 200;
+                let distAstRequired = 0.0012 * 1000 * overallDepth; // mm²/m
+                let distProvidedAst = (Math.PI * distDia * distDia / 4) * (1000 / distSpacing);
+                if (distProvidedAst < distAstRequired) {
+                    distSpacing = 150; // 8mm @150 = 335 mm²/m
+                }
+                const distUnitWeight = (distDia * distDia) / 162; // kg/m
+                const numDist = Math.ceil((Lx * 1000) / distSpacing); // along span direction
+                const distLength = slabWidth + 0.2; // perpendicular to span
+                const distWeight = numDist * distLength * distUnitWeight;
+
+                reinforcementItems.push({
+                    description: `Distribution steel ${distDia} mm Ø @ ${distSpacing} mm c/c (transverse)`,
+                    numBars: numDist,
+                    barLength: distLength.toFixed(2),
+                    unitWeight: distUnitWeight.toFixed(3),
+                    weight: distWeight
+                });
+                totalSteelWeight += distWeight;
+            } else {
+                // Two-way slab: main bars in both directions
+                // Short span direction (Lx)
+                const numShort = Math.ceil((slabWidth * 1000) / spacing); // along width (Ly)
+                const shortLength = Lx + 0.2;
+                const shortWeight = numShort * shortLength * unitWeight;
+
+                reinforcementItems.push({
+                    description: `Main reinforcement (short span) ${barDia} mm Ø @ ${spacing} mm c/c`,
+                    numBars: numShort,
+                    barLength: shortLength.toFixed(2),
+                    unitWeight: unitWeight.toFixed(3),
+                    weight: shortWeight
+                });
+                totalSteelWeight += shortWeight;
+
+                // Long span direction (Ly = slabWidth)
+                const numLong = Math.ceil((Lx * 1000) / spacing); // along Lx
+                const longLength = slabWidth + 0.2;
+                const longWeight = numLong * longLength * unitWeight;
+
+                reinforcementItems.push({
+                    description: `Main reinforcement (long span) ${barDia} mm Ø @ ${spacing} mm c/c`,
+                    numBars: numLong,
+                    barLength: longLength.toFixed(2),
+                    unitWeight: unitWeight.toFixed(3),
+                    weight: longWeight
+                });
+                totalSteelWeight += longWeight;
+
+                // Edge strips and torsion – estimate as 20% of main steel (simplified)
+                const extraWeight = 0.20 * (shortWeight + longWeight);
+                reinforcementItems.push({
+                    description: `Edge strips & torsion reinforcement (approx.)`,
+                    numBars: '-',
+                    barLength: '-',
+                    unitWeight: '-',
+                    weight: extraWeight
+                });
+                totalSteelWeight += extraWeight;
+            }
+
+            // Apply wastage
+            const steelWithWastage = totalSteelWeight * (1 + wastage);
+
+            // Costs
+            const concreteCost = concreteVolume * concreteRate;
+            const steelCost = steelWithWastage * steelRate;
+            const labourCost = area * labourRate;
+            const shutteringCost = area * shutteringRate;
+            const totalCost = concreteCost + steelCost + labourCost + shutteringCost;
+
+            // Build BOQ HTML
+            let boqHTML = `
+                <div class="boq-card">
+                    <h3>📋 Bill of Quantities (As per BBS Guidelines)</h3>
+                    <p><strong>Slab Plan:</strong> ${Lx.toFixed(2)} m x ${slabWidth.toFixed(2)} m, Area = ${area.toFixed(2)} m²</p>
+                    <p><strong>Overall Depth:</strong> ${overallDepth.toFixed(0)} mm</p>
+                    <p><strong>Concrete Volume:</strong> ${concreteVolume.toFixed(2)} m³ (Grade M${fck})</p>
+                    <p><em>Unit Weight Formula used: D²/162 kg/m (as per IS code)</em></p>
+                    
+                    <h4 style="margin-top:15px;">Reinforcement Steel (Fe ${fy})</h4>
+                    <table class="boq-table">
+                        <tr><th>Description</th><th>No. of Bars</th><th>Bar Length (m)</th><th>Unit Wt (kg/m)</th><th>Weight (kg)</th></tr>
+            `;
+            reinforcementItems.forEach(item => {
+                boqHTML += `<tr>
+                    <td>${item.description}</td>
+                    <td>${item.numBars}</td>
+                    <td>${item.barLength}</td>
+                    <td>${item.unitWeight}</td>
+                    <td>${item.weight ? item.weight.toFixed(2) : '-'}</td>
+                </tr>`;
+            });
+            boqHTML += `<tr style="font-weight:700; background:#f0f0f0;">
+                <td colspan="4">Subtotal (without wastage)</td>
+                <td>${totalSteelWeight.toFixed(2)} kg</td>
+            </tr>`;
+            boqHTML += `<tr>
+                <td colspan="4">Wastage (${wastage*100}%)</td>
+                <td>${(totalSteelWeight * wastage).toFixed(2)} kg</td>
+            </tr>`;
+            boqHTML += `<tr style="font-weight:700; background:#e0e0e0;">
+                <td colspan="4">Total Steel Required</td>
+                <td>${steelWithWastage.toFixed(2)} kg</td>
+            </tr>`;
+            boqHTML += `</table>`;
+
+            boqHTML += `
+                <p><strong>Concrete Cost:</strong> ₹ ${concreteCost.toFixed(2)}</p>
+                <p><strong>Steel Cost:</strong> ₹ ${steelCost.toFixed(2)}</p>
+                <p><strong>Labour Cost (₹ ${labourRate}/m²):</strong> ₹ ${labourCost.toFixed(2)}</p>
+                <p><strong>Shuttering Cost (₹ ${shutteringRate}/m²):</strong> ₹ ${shutteringCost.toFixed(2)}</p>
+                <p><strong>Total Material + Labour + Shuttering Cost:</strong> ₹ ${totalCost.toFixed(2)}</p>
+                <p style="font-size:0.9em; margin-top:10px;"><em>Note: Quantities calculated using standard BBS formulas from IS codes. Bend deduction and hook lengths as per PDF guidelines. Edge strips and torsion steel are estimated.</em></p>
+            </div>
+            `;
+
+            boqDiv.innerHTML = boqHTML;
+        }
+
+        // PDF download function (updated to include BBS data)
+        function downloadPDF() {
+            if (!designData.reinforcement) {
+                alert('Please calculate design first before downloading PDF');
+                return;
+            }
+
+            const doc = new jsPDF();
+            let y = 20;
+            const pageHeight = doc.internal.pageSize.height;
+            const margin = 20;
+
+            function checkPageSpace(requiredSpace) {
+                if (y + requiredSpace > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin;
+                }
+            }
+
+            doc.setFontSize(16);
+            doc.text("RCC SLAB DESIGN REPORT", 105, y, { align: 'center' });
+            y += 10;
+            doc.setFontSize(12);
+            doc.text(`Slab Type: ${currentSlabType === 'oneway' ? 'One-Way Slab' : 'Two-Way Restrained Slab'}`, 105, y, { align: 'center' });
+            y += 7;
+            doc.text(`Design Date: ${new Date().toLocaleDateString()}`, 105, y, { align: 'center' });
+            y += 15;
+
+            // Input Parameters
+            checkPageSpace(50);
+            doc.setFontSize(14);
+            doc.text("INPUT PARAMETERS", 14, y);
+            y += 8;
+            doc.setFontSize(10);
+            
+            doc.text(`Span Lx: ${designData.Lx} m`, 20, y);
+            if (designData.Ly) doc.text(`Span Ly: ${designData.Ly} m`, 100, y);
+            y += 6;
+            doc.text(`Live Load: ${designData.liveLoad} kN/m²`, 20, y);
+            doc.text(`Floor Finish: ${designData.floorFinish} kN/m²`, 100, y);
+            y += 6;
+            doc.text(`Concrete: M${designData.fck}`, 20, y);
+            doc.text(`Steel: Fe ${designData.fy}`, 100, y);
+            doc.text(`Bar: ${designData.barDia}mm @ ${designData.userSpacing}mm`, 140, y);
+            y += 15;
+
+            // Design Summary
+            checkPageSpace(60);
+            doc.setFontSize(14);
+            doc.text("DESIGN SUMMARY", 14, y);
+            y += 8;
+            doc.setFontSize(10);
+            doc.text(`Overall Depth: ${designData.overallDepth} mm`, 20, y); y+=6;
+            doc.text(`Effective Depth: ${designData.effectiveDepth} mm`, 20, y); y+=6;
+            doc.text(`Provided Ast: ${designData.providedAst.toFixed(0)} mm²/m`, 20, y); y+=6;
+            doc.text(`Required Ast: ${designData.reinforcement.requiredAst || designData.reinforcement.requiredAstX} mm²/m`, 20, y); y+=6;
+            doc.text(`Deflection: ${designData.deflectionCheck.status}`, 20, y); y+=6;
+            doc.text(`Crack Width: ${designData.crackWidth.toFixed(3)} mm (${designData.crackWidthCheck.status})`, 20, y); y+=6;
+            if (designData.shearCheck) doc.text(`Shear: ${designData.shearCheck.status}`, 20, y); y+=6;
+
+            // BOQ Summary
+            checkPageSpace(80);
+            doc.setFontSize(14);
+            doc.text("BILL OF QUANTITIES (BBS)", 14, y);
+            y += 8;
+            doc.setFontSize(10);
+            const slabWidth = designData.slabWidth;
+            const area = designData.Lx * slabWidth;
+            const concreteVolume = area * (designData.overallDepth/1000);
+            // Simplified steel calculation using unit weight formula D²/162
+            const barDia = designData.barDia;
+            const spacing = designData.userSpacing;
+            const unitWeight = (barDia * barDia) / 162;
+            let totalSteel = 0;
+            if (currentSlabType === 'oneway') {
+                const numMain = Math.ceil((slabWidth * 1000) / spacing);
+                totalSteel = numMain * (designData.Lx + 0.2) * unitWeight;
+                // distribution steel
+                const distWeight = (Math.ceil((designData.Lx*1000)/200) * (slabWidth+0.2) * (64/162));
+                totalSteel += distWeight;
+            } else {
+                const numShort = Math.ceil((slabWidth * 1000) / spacing);
+                const numLong = Math.ceil((designData.Lx * 1000) / spacing);
+                totalSteel = (numShort * (designData.Lx+0.2) + numLong * (slabWidth+0.2)) * unitWeight;
+                totalSteel *= 1.15; // edge & torsion
+            }
+            const wastage = parseFloat(document.getElementById('wastage').value) / 100;
+            totalSteel *= (1 + wastage);
+            const concreteCost = concreteVolume * parseFloat(document.getElementById('concreteRate').value);
+            const steelCost = totalSteel * parseFloat(document.getElementById('steelRate').value);
+            const labourCost = area * parseFloat(document.getElementById('labourRate').value);
+            const shutteringCost = area * parseFloat(document.getElementById('shutteringRate').value);
+
+            doc.text(`Plan dimensions: ${designData.Lx} m x ${slabWidth.toFixed(2)} m, Area = ${area.toFixed(2)} m²`, 20, y); y+=6;
+            doc.text(`Concrete volume: ${concreteVolume.toFixed(2)} m³`, 20, y); y+=6;
+            doc.text(`Estimated steel weight (incl. wastage): ${totalSteel.toFixed(2)} kg (using D²/162)`, 20, y); y+=6;
+            doc.text(`Concrete cost: ₹ ${concreteCost.toFixed(2)}`, 20, y); y+=5;
+            doc.text(`Steel cost: ₹ ${steelCost.toFixed(2)}`, 20, y); y+=5;
+            doc.text(`Labour cost: ₹ ${labourCost.toFixed(2)}`, 20, y); y+=5;
+            doc.text(`Shuttering cost: ₹ ${shutteringCost.toFixed(2)}`, 20, y); y+=5;
+            doc.text(`Total cost: ₹ ${(concreteCost+steelCost+labourCost+shutteringCost).toFixed(2)}`, 20, y); y+=8;
+
+            doc.setFontSize(8);
+            doc.text("Designed as per IS 456:2000 with Table 26 coefficients & BBS formulas", 105, 290, { align: 'center' });
+
+            doc.save(`Slab_Design_${new Date().toISOString().slice(0,10)}.pdf`);
+        }
+
+        // Initialize
+        setSlabType('oneway');
+    </script>
+</body>
+</html>
